@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Details - GJ Terminal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap');
+        body { font-family: 'Manrope', sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 2rem 3rem; }
+        .details-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 1.5rem; }
+        .back-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; font-size: 1.5rem; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.2); }
+        .details-header h1 { margin: 0; font-size: 1.8rem; }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: min-content; /* Rows will size to their content */
+            gap: 1.5rem;
+        }
+
+        /* Base style for all cards */
+        .info-card {
+            background-color: #1e1e1e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            /* --- THIS IS THE FIX for the smooth animation --- */
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* --- THIS IS THE FIX for the hover effect --- */
+        .info-card:hover {
+            transform: translateY(-5px); /* The "lift" effect */
+            border-color: rgba(255, 255, 255, 0.4); /* The "glow" effect */
+        }
+
+        .specs-card { grid-column: 1 / 2; grid-row: 1 / 3; }
+        .pattern-card { grid-column: 2 / 3; grid-row: 1 / 2; }
+        .dates-card { grid-column: 2 / 3; grid-row: 2 / 3; }
+        .cutoff-card { grid-column: 3 / 4; grid-row: 1 / 3; }
+
+        .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0 0 1rem 0; }
+        .card-description { font-size: 0.95rem; color: #b0b0b0; line-height: 1.6; margin: 0; }
+
+        .spec-table, .pattern-table { width: 100%; }
+        .spec-table td, .pattern-table td { padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .spec-table tr:last-child td, .pattern-table tr:last-child td { border-bottom: none; }
+        .spec-table td:first-child, .pattern-table td:first-child { color: #aaa; width: 40%; }
+
+        .cutoff-table { width: 100%; margin-top: 1rem; border-collapse: collapse; }
+        .cutoff-table th, .cutoff-table td { padding: 12px 0; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .cutoff-table th { color: #aaa; }
+        .cutoff-table tr:last-child td { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <header class="details-header">
+        <a href="{{ url_for('index') }}" class="back-btn" title="Back to Terminal">&larr;</a>
+        <h1>{{ job['exam_name'] }} Details</h1>
+    </header>
+
+    <main class="details-grid">
+        <div class="info-card specs-card">
+            <h3 class="card-title">Job Specifications</h3>
+            <table class="spec-table"><tbody>
+                <tr><td>Nationality</td><td>{{ job_spec.nationality }}</td></tr>
+                <tr><td>Age Limits</td><td>{{ job_spec.age_limits }}</td></tr>
+                <tr><td>Age Relax.</td><td>{{ job_spec.age_relax }}</td></tr>
+                <tr><td>Edu. Qual.</td><td>{{ job_spec.edu_qual }}</td></tr>
+                <tr><td>No. of Attempts</td><td>{{ job_spec.attempts }}</td></tr>
+                <tr><td>Physical Standards</td><td>{{ job_spec.physical_std }}</td></tr>
+            </tbody></table>
+        </div>
+
+        <div class="info-card pattern-card">
+            <h3 class="card-title">Exam Pattern</h3>
+            <table class="pattern-table"><tbody>
+                <tr><td>Stages</td><td>{{ exam_pattern.stages }}</td></tr>
+                <tr><td>No. of Papers</td><td>{{ exam_pattern.num_papers }}</td></tr>
+                <tr><td>Type of Qs</td><td>{{ exam_pattern.q_type }}</td></tr>
+                <tr><td>Duration</td><td>{{ exam_pattern.duration }}</td></tr>
+                <tr><td>Marking Scheme</td><td>{{ exam_pattern.marking_scheme }}</td></tr>
+            </tbody></table>
+        </div>
+
+        <div class="info-card dates-card">
+            <h3 class="card-title">Important Dates</h3>
+            <p class="card-description">
+                <strong>Apply From:</strong> {{ job['application_start'] or 'TBA' }}<br>
+                <strong>Apply Until:</strong> {{ job['application_end'] or 'TBA' }}<br>
+                <strong>Exam Date:</strong> {{ job['exam_date'] or 'TBA' }}
+            </p>
+        </div>
+
+        <div class="info-card cutoff-card">
+            <h3 class="card-title">Recent Year Cutoffs</h3>
+            <p class="card-description">Based on the {{ cutoffs[0]['year'] if cutoffs else 'latest' }} results.</p>
+            <table class="cutoff-table">
+                <thead><tr><th>Category</th><th>Score</th></tr></thead>
+                <tbody>
+                    {% for cutoff in cutoffs %}
+                    <tr><td>{{ cutoff['category'] }}</td><td>{{ cutoff['cutoff_score'] }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-card">
+            <h3 class="card-title">Application Fee</h3>
+            <p class="card-description">Typically ₹100 for General/OBC candidates. Women and SC/ST/PwBD candidates are usually exempted.</p>
+        </div>
+        <div class="info-card">
+            <h3 class="card-title">Official Website</h3>
+            <p class="card-description">Always refer to the official conducting body's website for the most accurate and up-to-date information.</p>
+        </div>
+        <div class="info-card">
+            <h3 class="card-title">Vacancies</h3>
+            <p class="card-description">The number of vacancies is announced in the official notification and can vary each year based on government requirements.</p>
+        </div>
+
+    </main>
+    <script>
+        // --- SCRIPT FOR KEYBOARD SCROLLING ---
+        // This was already here, and now you can test it!
+        document.addEventListener('keydown', function(event) {
+            const verticalScrollAmount = 150;
+            switch (event.key) {
+                case 'ArrowUp':
+                    event.preventDefault();
+                    window.scrollBy({ top: -verticalScrollAmount, behavior: 'smooth' });
+                    break;
+                case 'ArrowDown':
+                    event.preventDefault();
+                    window.scrollBy({ top: verticalScrollAmount, behavior: 'smooth' });
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
